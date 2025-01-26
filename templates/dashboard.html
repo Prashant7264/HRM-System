@@ -1,0 +1,42 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block 'main' %}
+    <div class="container mt-4">
+        <div class="row">
+            <div class="col-md-6 col-lg-3">
+                <div class="card text-white bg-primary mb-3">
+                    <div class="card-body">
+                        <h5 class="card-title">Total Employees</h5>
+                        <p class="card-text" id="total-employees">245</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6 col-lg-3">
+                <div class="card text-white bg-success mb-3">
+                    <div class="card-body">
+                        <h5 class="card-title">Pending Leave Requests</h5>
+                        <p class="card-text">15</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6 col-lg-3">
+                <div class="card text-white bg-warning mb-3">
+                    <div class="card-body">
+                        <h5 class="card-title">Today's Attendance</h5>
+                        <p class="card-text">220 Present</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6 col-lg-3">
+                <div class="card text-white bg-danger mb-3">
+                    <div class="card-body">
+                        <h5 class="card-title">Upcoming Events</h5>
+                        <p class="card-text">Team Meeting</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>  
+</div>
+{% endblock 'main' %}
