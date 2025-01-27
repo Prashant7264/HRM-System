@@ -10,6 +10,7 @@
     <table class="table table-bordered table-hover shadow">
         <thead class="table-dark">
         <tr>
+            <th>Dept ID</th>
             <th>Name</th>
             <th>Description</th>
             <th>Status</th>
@@ -19,6 +20,7 @@
         
         {% for department in departments %}
         <tr>
+            <td>{{ department.dept_id }}</td>
             <td>{{ department.dept_name }}</td>
             <td>{{ department.description }}</td>
             <td>

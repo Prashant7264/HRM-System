@@ -1,0 +1,44 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block 'main' %}
+<div class="container mt-5">
+<h1 class="text-center mb-4">Roles Dashboard</h1>
+    <form class="d-flex" method="get" action="/role/">
+        
+    </form>
+    <a href="{% url 'add_role' %}" class="btn btn-success">Create New Role</a><hr>
+    <table class="table table-bordered table-hover shadow">
+        <thead class="table-dark">
+        <tr>
+            <th>Role ID</th>
+            <th>Role Name</th>
+            <th>Description</th>
+            <th>Status</th>
+            <th>Actions</th>
+        </tr>
+        </thead>
+        
+        {% for role in roles %}
+        <tr>
+            <td>{{ role.role_id }}</td>
+            <td>{{ role.role_name }}</td>
+            <td>{{ role.description }}</td>
+            <td>
+                
+                {% if role.status %}
+                    Active
+                {% else %}
+                    Inactive
+                {% endif %}
+                
+            </td>
+            <td>
+                <a href="{% url 'update_role' role.role_id %}" class="btn btn-warning btn-sm">Edit</a>
+                <a href="{% url 'delete_role' role.role_id %}" class="btn btn-warning btn-sm">Delete</a>
+            </td>
+        </tr>
+        {% endfor %}
+        
+    </table>
+    </div>
+    {% endblock 'main' %}

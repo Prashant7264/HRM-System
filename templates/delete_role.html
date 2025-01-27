@@ -2,22 +2,22 @@
 {% load static %}
 {% block 'main' %}
 
-<title>Delete Department</title>
+<title>Delete Role</title>
 </head>
 <body>
     <div class="container mt-5">
-    <h1 class="text-center text-danger mb-4">Delete Department</h1>
+    <h1 class="text-center text-danger mb-4">Delete Role</h1>
     <div class="alert alert-warning text-center">
-    Are you sure you want to mark the department "<strong>{{ department.dept_name }}</strong>" as inactive?
+    Are you sure you want to mark the role "<strong>{{ role.role_name }}</strong>" as inactive?
 </div>
             <p class="text-danger mt-3">
-                Warning: This will inactivate all employees linked to this department. Please reassign employees before proceeding.
+                Warning: This will inactivate all employees linked to this Role. Please reassign the Role employees before proceeding.
             </p>
     <div class="d-flex justify-content-center">
     <form method="post" class="me-2">
         {% csrf_token %}
         <button type="submit" class="btn btn-danger">Yes, Mark as Inactive</button>
-        <a href="/department/" class="btn btn-secondary">Cancel</a>
+        <a href="/role/" class="btn btn-secondary">Cancel</a>
     </form>
 </div>
 
