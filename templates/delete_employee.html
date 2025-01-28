@@ -1,0 +1,24 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block 'main' %}
+
+<title>Delete Employee</title>
+</head>
+<body>
+    <div class="container mt-5">
+    <h1 class="text-center text-danger mb-4">Delete Department</h1>
+    <div class="alert alert-warning text-center">
+    Are you sure you want to mark the Employee "<strong>{{ user.username }}</strong>" as inactive?
+</div>
+            <p class="text-danger mt-3">
+                Warning: This will inactivate Employee
+            </p>
+    <div class="d-flex justify-content-center">
+    <form method="post" class="me-2">
+        {% csrf_token %}
+        <button type="submit" class="btn btn-danger">Yes, Mark as Inactive</button>
+        <a href="/employee/" class="btn btn-secondary">Cancel</a>
+    </form>
+</div>
+
+{% endblock 'main' %}

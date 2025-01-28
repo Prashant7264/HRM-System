@@ -14,6 +14,10 @@ urlpatterns = [
     path('add_role/', views.add_role, name='add_role'),
     path('update_role/<int:role_id>/', views.update_role, name='update_role'),
     path('delete_role/<int:role_id>/', views.delete_role, name='delete_role'),
+    path('employee/',views.employee),
+    path('add_employee/', views.add_employee, name='add_employee'),
+    path('update_employee/<int:employee_id>/', views.update_employee, name='update_employee'),
+    path('delete_employee/<int:employee_id>/', views.delete_employee, name='delete_employee'),
 ]
 
 if settings.DEBUG:

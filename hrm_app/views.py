@@ -1,7 +1,7 @@
 from django.shortcuts import render, get_object_or_404, redirect
 from django.contrib import messages
-from .models import Department, Role
-from .forms import DepartmentForm, RoleForm
+from .models import Department, Role, User
+from .forms import DepartmentForm, RoleForm, UserForm
 
 # Create your views here.
 
@@ -87,3 +87,43 @@ def delete_role(request, role_id):
         messages.warning(request, "Role marked as inactive. Please Change the role of employees.")
         return redirect('/role')
     return render(request, 'delete_role.html', {'role': role})
+
+def employee(request):
+    users = User.objects.all()
+    for user in users:
+        user.is_active = "Active" if user.is_active else "Inactive"
+    return render(request, 'employee.html',{'users': users})
+
+def add_employee(request):
+    if request.method == 'POST':
+        form = UserForm(request.POST)
+        if form.is_valid():
+            form.save()
+            messages.success(request, "Employee added successfully!")
+            return redirect('/employee')
+    else:
+        form = UserForm()
+    return render(request, 'add_employee.html', {'form': form})
+
+# Update Employee View
+def update_employee(request, employee_id):
+    user = get_object_or_404(User, pk=employee_id)
+    if request.method == 'POST':
+        form = UserForm(request.POST, instance=user)
+        if form.is_valid():
+            form.save()
+            messages.success(request, "Employee Details updated successfully!")
+            return redirect('/employee')
+    else:
+        form = UserForm(instance=user)
+    return render(request, 'update_employee.html', {'form': form, 'user': user})
+
+# Delete Employee (Soft Delete)
+def delete_employee(request, employee_id):
+    user = get_object_or_404(User, pk=employee_id)
+    if request.method == 'POST':
+        user.status = False  # Mark as inactive
+        user.save()
+        messages.warning(request, "Employee marked as inactive.")
+        return redirect('/employee')
+    return render(request, 'delete_employee.html', {'user': user})
