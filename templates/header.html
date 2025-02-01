@@ -30,17 +30,17 @@
                 <li class="nav-item my-2">
                     <a class="nav-link text-white" href="/employee/"><i class="bi bi-currency-dollar"></i> Employee Management</a>
                 </li>
+                {% if user.is_authenticated %}
                 <li class="nav-item my-2">
-                    <a class="nav-link text-white" href="#attendance"><i class="bi bi-calendar-check"></i> Attendance</a>
+                    <a class="nav-link text-white" href="/logout/"><i class="bi bi-book"></i> Logout</a>
                 </li>
+                {% else %}
                 <li class="nav-item my-2">
-                    <a class="nav-link text-white" href="#leaves"><i class="bi bi-calendar-check"></i> Leaves</a>
+                    <a class="nav-link text-white" href="/login/"><i class="bi bi-calendar-check"></i> Login</a>
                 </li>
+                {% endif %}
                 <li class="nav-item my-2">
-                    <a class="nav-link text-white" href="#policies"><i class="bi bi-book"></i> Policies</a>
-                </li>
-                <li class="nav-item my-2">
-                    <a class="nav-link text-white" href="#reports"><i class="bi bi-bar-chart"></i> Reports</a>
+                    <a class="nav-link text-white" href="/forgot-password/"><i class="bi bi-bar-chart"></i> Change Password</a>
                 </li>
             </ul>
         </nav>
@@ -52,7 +52,7 @@
                 <input class="form-control me-2" type="search" placeholder="Enter Emplyee ID" aria-label="Search">
                 <button class="btn btn-outline-success" type="submit">Search</button>
               </form>                 -->
-            <h4 class="ms-auto">Welcome, HR Manager</h4>
+            <h4 class="ms-auto">Welcome,HR Manager{{user.username}}</h4>
             
         </div>
     </nav>

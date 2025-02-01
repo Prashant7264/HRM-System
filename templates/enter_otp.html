@@ -1,0 +1,38 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block 'main' %}
+<div class="container d-flex justify-content-center align-items-center vh-100">
+    <div class="card shadow p-4" style="max-width: 400px; width: 100%; border-radius: 10px;">
+        <h2 class="text-center mb-3">Verify OTP</h2>
+        <p class="text-center text-muted">Please enter the OTP sent to your email.</p>
+
+        <!-- Display error/success messages -->
+        {% if messages %}
+            <div class="alert alert-danger">
+                {% for message in messages %}
+                    <p class="mb-0">{{ message }}</p>
+                {% endfor %}
+            </div>
+        {% endif %}
+
+        <form method="post">
+            {% csrf_token %}
+            <div class="mb-3">
+                <label for="otp" class="form-label fw-bold">Enter OTP:</label>
+                <input type="text" name="otp" class="form-control text-center" required maxlength="6" placeholder="6-digit OTP">
+            </div>
+            <!-- <button type="submit" class="btn btn-primary w-100">Verify OTP</button> -->
+            <a href="{% url 'password_reset_confirm' uidb64='encoded_uid' token='reset_token' %}" class="btn btn-primary w-100">Verify OTP</a>
+        </form>
+
+        <!-- Resend OTP link -->
+        <div class="text-center mt-3">
+            <a href="{% url 'request_otp' %}" class="text-decoration-none">Resend OTP</a>
+        </div>
+    </div>
+</div>
+
+<!-- Optional: Add JavaScript for input validation
+<script src="{% static 'js/scripts.js' %}"></script> -->
+{% endblock 'main' %}

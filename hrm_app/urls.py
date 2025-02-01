@@ -2,7 +2,8 @@ from hrm_app import views
 from django.urls import path
 from hr_management import settings
 from django.conf.urls.static import static
-
+from hrm_app.views import user_login, user_logout, CustomPasswordResetView, PasswordResetConfirmView, reset_password, verify_otp, request_otp
+from django.contrib.auth import views as auth_views
 urlpatterns = [
     #path('admin/', admin.site.urls),
     path('dashboard/',views.dashboard),
@@ -18,6 +19,26 @@ urlpatterns = [
     path('add_employee/', views.add_employee, name='add_employee'),
     path('update_employee/<int:employee_id>/', views.update_employee, name='update_employee'),
     path('delete_employee/<int:employee_id>/', views.delete_employee, name='delete_employee'),
+    path('login/', user_login, name='login'),
+    path('logout/', user_logout, name='logout'),
+    # Password reset request (enter email)
+    path('password_reset/', auth_views.PasswordResetView.as_view(template_name='password_reset_form.html'), name='password_reset'),
+
+    # Password reset done (confirmation message after email sent)
+    path('password_reset_done/', auth_views.PasswordResetDoneView.as_view(template_name='password_reset_done.html'), name='password_reset_done'),
+
+    # Password reset confirm (user enters new password)
+    path('reset/<uidb64>/<token>/', auth_views.PasswordResetConfirmView.as_view(template_name='password_reset_confirm.html'), name='password_reset_confirm'),
+
+    # Password reset complete (after password reset success)
+    path('password_reset_complete/', auth_views.PasswordResetCompleteView.as_view(template_name='password_reset_complete.html'), name='password_reset_complete'),
+
+    # Custom password reset page (after login, mandatory reset)
+    path('reset_password/', reset_password, name='reset_password'),
+
+    path('verify-otp/', verify_otp, name='verify_otp'),
+    path('forgot-password/', request_otp, name='forgot_password'),
+    path('request_otp/', request_otp, name='request_otp'),
 ]
 
 if settings.DEBUG:

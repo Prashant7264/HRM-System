@@ -31,12 +31,8 @@
             <td>{{ user.last_name }}</td>
             <td>{{ user.username }}</td>
             <td>{{ user.email }}</td>
-            <td>{% if user.role_id %}
-                {{ user.role.role_name }}
-            {% else %}
-                No Role Assigned
-            {% endif %}</td>
-            <td>{{ user.dept_id }}</td>
+            <td>{{ user.role_name }}</td>
+            <td>{{ user.dept_name }}</td>
             <td>{{ user.reporting_manager_id }}
             <td>{{ user.date_of_joining  }}</td>
             <td>
