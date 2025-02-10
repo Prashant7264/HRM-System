@@ -32,11 +32,11 @@
                 </li>
                 {% if user.is_authenticated %}
                 <li class="nav-item my-2">
-                    <a class="nav-link text-white" href="/logout/"><i class="bi bi-book"></i> Logout</a>
+                    <a class="nav-link text-white" href="/logout/"><i class="bi bi-box-arrow-right"></i> Logout</a>
                 </li>
                 {% else %}
                 <li class="nav-item my-2">
-                    <a class="nav-link text-white" href="/login/"><i class="bi bi-calendar-check"></i> Login</a>
+                    <a class="nav-link text-white" href="/login/"><i class="bi bi-box-arrow-in-right"></i> Login</a>
                 </li>
                 {% endif %}
                 <li class="nav-item my-2">
@@ -52,7 +52,13 @@
                 <input class="form-control me-2" type="search" placeholder="Enter Emplyee ID" aria-label="Search">
                 <button class="btn btn-outline-success" type="submit">Search</button>
               </form>                 -->
-            <h4 class="ms-auto">Welcome,HR Manager{{user.username}}</h4>
+              <h4 class="ms-auto">
+                {% if user.is_authenticated %}
+                    Welcome, HR Manager {{ user.username }}
+                {% else %}
+                    Welcome, Guest
+                {% endif %}
+            </h4>
             
         </div>
     </nav>

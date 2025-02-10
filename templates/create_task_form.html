@@ -1,0 +1,81 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block 'main' %}
+<div class="container mt-5">
+    <div class="row justify-content-center">
+       
+        <div class="col-md-6">
+            <div class="card shadow-lg p-4">
+                <h1 class="text-center mb-4">Create Task</h1>
+
+                <form method="POST" action="{% url 'create_task' %}">
+                    {% csrf_token %}
+                    <!-- Task Title -->
+                    <div class="mb-3">
+                        <label for="taskTitle" class="form-label">Task Title</label>
+                        <input type="text" class="form-control" id="taskTitle" name="task_title" placeholder="Enter Task Title" value="{{ task.title }}">
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="description" class="form-label">Task Description</label>
+                        <textarea class="form-control" id="description" name="task_description" rows="4" placeholder="Enter Task Description">{{ task.description }}</textarea>
+                    </div>
+                    <div class="mb-3">
+                        <label for="priority" class="form-label">Priority</label>
+                        <select class="form-select" id="priority" name="task_priority">
+                            <option value="High" {% if task.priority == 'High' %} selected {% endif %}>High</option>
+                            <option value="Medium" {% if task.priority == 'Medium' %} selected {% endif %}>Medium</option>
+                            <option value="Low" {% if task.priority == 'Low' %} selected {% endif %}>Low</option>
+                        </select>
+                    </div>
+                    <!-- Employee Dropdown -->
+                    <div class="mb-3">
+                        <label for="employee" class="form-label">Assigned To</label>
+                        <select class="form-select" id="employee" name="employee">
+                            <option value="">Select Employee</option>
+                            {% for employee in employees %}
+                                <option value="{{ employee.id }}" {% if task.employee.id == employee.id %} selected {% endif %}>{{ user.username }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <!-- Start Date -->
+                    <div class="mb-3">
+                        <label for="startDate" class="form-label">Start Date</label>
+                        <input type="date" class="form-control" id="startDate" name="start_date" value="{{ task.start_date }}">
+                    </div>
+
+                    <!-- End Date -->
+                    <div class="mb-3">
+                        <label for="endDate" class="form-label">End Date</label>
+                        <input type="date" class="form-control" id="endDate" name="end_date" value="{{ task.end_date }}">
+                    </div>
+
+                    <!-- Status -->
+                    <!-- <div class="mb-3">
+                        <label for="status" class="form-label">Status</label>
+                        <select class="form-select" id="status" name="status">
+                            <option value="Pending" {% if task.status == 'Pending' %} selected {% endif %}>Pending</option>
+                            <option value="In Progress" {% if task.status == 'In Progress' %} selected {% endif %}>In Progress</option>
+                            <option value="Completed" {% if task.status == 'Completed' %} selected {% endif %}>Completed</option>
+                        </select>
+                    </div> -->
+                    <div class="mb-3">
+                        <label for="taskType" class="form-label">Task Type</label>
+                        <select class="form-select" id="taskType" name="task_type">
+                            <option value="Individual" {% if task.taskType == 'Individual' %} selected {% endif %}>Individual</option>
+                            <option value="Team" {% if task.taskType == 'Team' %} selected {% endif %}>Team</option>
+                        </select>
+                    </div>
+                    <!-- Buttons -->
+                    <div class="d-flex justify-content-between">
+                        <button type="submit" class="btn btn-success w-45">Create Task</button>
+                        <a href="/dashboard/" class="btn btn-secondary w-45">Back to Dashboard</a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock 'main' %}

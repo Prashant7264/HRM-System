@@ -6,6 +6,13 @@
         <h2 class="text-center mb-4">Login</h2>
         <form method="post">
             {% csrf_token %}
+            {% if messages %}
+            <div class="alert alert-danger">
+                {% for message in messages %}
+                    <p>{{ message }}</p>
+                {% endfor %}
+            </div>
+        {% endif %}
             <div class="form-group mb-3">
                 {{ form.as_p }}
             </div>

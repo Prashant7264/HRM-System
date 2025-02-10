@@ -2,7 +2,7 @@ from django.shortcuts import render, get_object_or_404, redirect
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.views import PasswordResetView, PasswordResetConfirmView
 from django.contrib import messages
-from .models import Department, Role, User
+from .models import Department, Role, User, Task, TaskAssignment
 from .forms import DepartmentForm, RoleForm, UserForm, UserLoginForm, ResetPasswordForm, SetNewPasswordForm
 from django.core.mail import send_mail
 from django.template.loader import render_to_string
@@ -16,14 +16,58 @@ from django.utils.http import urlsafe_base64_encode
 from django.utils.encoding import force_bytes
 from django.template.loader import render_to_string
 from django.contrib.auth.tokens import default_token_generator
+from django.contrib.auth.decorators import login_required
 import random
+from django.utils.dateparse import parse_date
+from django.db.models import Q
 
 otp_storage = {} 
 
 # Create your views here.
 
 def dashboard(request):
-    return render(request,'dashboard.html')
+    is_admin_or_manager = request.user.is_superuser or request.user.groups.filter(name="Manager").exists()
+    employees = User.objects.all()  # Fetch all employees for filter dropdown
+    tasks = Task.objects.all()  # Start with all tasks
+
+    # Get filter values from GET request
+    selected_employee = request.GET.get('employee')
+    selected_status = request.GET.get('status')
+    selected_start_date = request.GET.get('start_date')
+    selected_end_date = request.GET.get('end_date')
+
+    # Apply filters based on user selection
+    if selected_employee:
+        tasks = tasks.filter(employee_id=selected_employee)
+
+    if selected_status:
+        tasks = tasks.filter(task_status=selected_status)
+
+    if selected_start_date:
+        tasks = tasks.filter(start_date__gte=selected_start_date)
+
+    if selected_end_date:
+        tasks = tasks.filter(end_date__lte=selected_end_date)
+
+    # Task Statistics
+    stats = {
+        "task_count": tasks.count(),
+        "completed": tasks.filter(assignments__status="Completed").count(),
+        "in_progress": tasks.filter(assignments__status="In Progress").count(),
+        "pending": tasks.filter(assignments__status="Pending").count(),
+    }
+
+    context = {
+        "employees": employees,
+        "tasks": tasks,
+        "selected_employee": selected_employee,
+        "selected_status": selected_status,
+        "selected_start_date": selected_start_date,
+        "selected_end_date": selected_end_date,
+        "stats": stats
+    }
+
+    return render(request, 'dashboard.html', context)
 
 def department(request):
     departments = Department.objects.all()
@@ -152,24 +196,18 @@ def delete_employee(request, employee_id):
 
 def user_login(request):
     if request.method == 'POST':
-        form = UserLoginForm(data=request.POST)
+        form = UserLoginForm(request.POST)
         if form.is_valid():
-            username = form.cleaned_data['username']
-            password = form.cleaned_data['password']
-            user = authenticate(request, username=username, password=password)
-            if user is not None:
-                # Check if the user is logging in with the default password
-                if user.is_staff and password == 'default_password':  # Replace 'default_password' with actual default
-                    # Redirect to password reset page only once
-                    return redirect('reset_password')
-                else:
-                    login(request, user)
-                    return redirect('dashboard')
-            else:
-                messages.error(request, 'Invalid username or password.')
+            user = authenticate(
+                request,
+                username=form.cleaned_data['username'],
+                password=form.cleaned_data['password']
+            )
+            if user:
+                login(request, user)
+                return redirect('dashboard')  # Redirect to a logged-in page
     else:
         form = UserLoginForm()
-    
     return render(request, 'login.html', {'form': form})
 
 def user_logout(request):
@@ -279,4 +317,172 @@ def request_otp(request):
     
     return render(request, "forgot_password.html")
 
+def create_task(request):
+    # Get the current logged-in user (admin, manager, etc.)
+    user = request.user
 
+    if request.method == 'POST':
+        print(request.POST)
+        # Extract data from the form
+        title = request.POST.get('task_title')
+        description = request.POST.get('task_description')
+        priority = request.POST.get('task_priority')
+        employee_id = request.POST.get('employee_id')
+        start_date = request.POST.get('start_date')
+        end_date = request.POST.get('end_date')
+        task_type = request.POST.get('task_type')
+
+        # if not title or not description or not priority or not task_type or not start_date or not end_date:
+        #     messages.error(request, 'Please fill in all the fields.')
+        #     return redirect('/create/') 
+        
+        # Get the selected employee
+        employee = User.objects.get(id=employee_id) if employee_id else None
+        
+        # Create the Task instance
+        task = Task(
+            task_title=title,
+            task_description=description,
+            task_priority=priority,
+            start_date=start_date,
+            end_date=end_date,
+            task_type=task_type,
+        )
+        task.save()  # Save the task instance first
+        
+        # Create a TaskAssignment instance
+        # task_assignment = TaskAssignment(
+        #     task=task,
+        #     employee_id=employee,
+        #     assigned_by=request.user,  # Current logged-in user is assigning the task
+        # )
+        # task_assignment.save()  # Save the task assignment
+        
+        # Show a success message
+        messages.success(request, 'Task created and assigned successfully!')
+        
+        # Redirect to the dashboard or task list page
+        return redirect('/dashboard/')
+    else:
+        # Fetch all employees for the employee dropdown
+        employees = User.objects.all()
+
+        # Create an empty task instance for pre-populating the form
+        task = Task()
+
+        # Render the form with employees data
+        return render(request, 'create_task_form.html', {'employees': employees, 'task': task})
+
+# @login_required
+def update_task(request, task_id):
+    # Fetch the task to be updated
+    task = get_object_or_404(Task, task_id=task_id)
+
+    if request.method == 'POST':
+        # Extract data from the form
+        title = request.POST.get('task_title')
+        description = request.POST.get('task_description')
+        priority = request.POST.get('task_priority')
+        employee_id = request.POST.get('employee_id')
+        start_date = request.POST.get('start_date')
+        end_date = request.POST.get('end_date')
+        task_type = request.POST.get('task_type')
+
+        # Get the selected employee
+        employee = User.objects.get(id=employee_id) if employee_id else None
+        
+        # Update task instance
+        task.task_title = title
+        task.task_description = description
+        task.task_priority = priority
+        task.start_date = start_date
+        task.end_date = end_date
+        task.task_type = task_type
+        task.employee = employee
+        task.save()  # Save the updated task instance
+        
+        # Show success message
+        messages.success(request, 'Task updated successfully!')
+        
+        # Redirect to the dashboard or task list page
+        return redirect('/dashboard/')
+    
+    else:
+        # Fetch all employees for the employee dropdown
+        employees = User.objects.all()
+
+        # Render the form with existing task data
+        return render(request, 'update_task_form.html', {'employees': employees, 'task': task})
+    
+
+def delete_task(request, task_id):
+    # Fetch the task to be deleted
+    task = get_object_or_404(Task, id=task_id)
+
+    if request.method == 'POST':
+        # Delete the task instance
+        task.delete()
+        
+        # Show success message
+        messages.success(request, 'Task deleted successfully!')
+        
+        # Redirect to the dashboard or task list page
+        return redirect('/dashboard/')
+    
+    # Render confirmation template for task deletion
+    return render(request, 'confirm_delete.html', {'task': task})
+
+
+def task_count_view(request):
+    # Count the number of tasks (you can filter if needed)
+    task_count = Task.objects.count()
+    
+    # Interpolating count into a string
+    message = f'Total number of tasks: {task_count}'
+    
+    return render(request, 'dashboard.html', {'message': message})
+
+# def task_list(request):
+#     # Get filter values from request
+#     selected_employee = request.GET.get('employee', '')
+#     selected_status = request.GET.get('status', '')
+#     selected_start_date = request.GET.get('start_date', '')
+#     selected_end_date = request.GET.get('end_date', '')
+
+#     # Fetch tasks
+#     tasks = Task.objects.all()
+
+#     # Apply filters
+#     if selected_employee:
+#         tasks = tasks.filter(employee_id=selected_employee)
+    
+#     if selected_status:
+#         tasks = tasks.filter(task_status=selected_status)
+
+#     if selected_start_date:
+#         tasks = tasks.filter(start_date__gte=selected_start_date)
+
+#     if selected_end_date:
+#         tasks = tasks.filter(end_date__lte=selected_end_date)
+
+#     # Get employee list for dropdown
+#     employees = User.objects.all()
+
+#     # Task statistics
+#     stats = {
+#         'task_count': tasks.count(),
+#         'completed': tasks.filter(task_status='Completed').count(),
+#         'in_progress': tasks.filter(task_status='In Progress').count(),
+#         'pending': tasks.filter(task_status='Pending').count(),
+#     }
+
+#     context = {
+#         'tasks': tasks,
+#         'employees': employees,
+#         'selected_employee': selected_employee,
+#         'selected_status': selected_status,
+#         'selected_start_date': selected_start_date,
+#         'selected_end_date': selected_end_date,
+#         'stats': stats
+#     }
+#     return render(request, 'dashboard.html', context)
