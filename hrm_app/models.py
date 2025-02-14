@@ -1,6 +1,7 @@
 from django.db import models
 from django.utils.timezone import now
 
+
 # Create your models here.
 class Department(models.Model):
     dept_id = models.AutoField(primary_key=True)
@@ -86,3 +87,25 @@ class TaskAssignment(models.Model):
 
     def __str__(self):
         return f"{self.task.task_title} assigned to {self.user.username}"
+    
+class PerformanceReview(models.Model):
+    PERIOD_CHOICES = [
+        ('Monthly', 'Monthly'),
+        ('Quarterly', 'Quarterly'),
+        ('Annual', 'Annual'),
+    ]
+    
+
+    review_id = models.AutoField(primary_key=True)
+    review_title = models.CharField(max_length=100)
+    review_date = models.DateField()
+    employee_id = models.ForeignKey(User, on_delete=models.CASCADE, related_name='reviews')
+    reviewed_by = models.ForeignKey(User, on_delete=models.CASCADE, related_name='given_reviews')
+    review_period = models.CharField(max_length=100, choices=PERIOD_CHOICES)
+    rating = models.IntegerField(default=1)  # Range: 1-10
+    comments = models.CharField(max_length=300, blank=True, null=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    def __str__(self):
+        return f"Review {self.review_id} - {self.review_title}"

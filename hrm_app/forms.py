@@ -1,6 +1,6 @@
 from django import forms
 from django.contrib.auth.forms import AuthenticationForm, PasswordResetForm, SetPasswordForm,  UserCreationForm
-from .models import Department, Role, User
+from .models import Department, Role, User, PerformanceReview
 from django.contrib.auth import get_user_model
 
 class DepartmentForm(forms.ModelForm):
@@ -94,3 +94,14 @@ class SetNewPasswordForm(SetPasswordForm):
 #     class Meta:
 #         model = TaskAssignment
 #         fields = ['task', 'employee', 'status']
+
+class PerformanceReviewForm(forms.ModelForm):
+    class Meta:
+        model = PerformanceReview
+        fields = ['review_title', 'employee_id','review_date',  'review_period', 'rating', 'comments']
+        widgets = {
+            'review_date': forms.DateInput(attrs={'type': 'date'}),
+            'review_period': forms.Select(choices=PerformanceReview.PERIOD_CHOICES),
+            'rating': forms.NumberInput(attrs={'min': 1, 'max': 10}),
+            'comments': forms.Textarea(attrs={'rows': 3}),
+        }

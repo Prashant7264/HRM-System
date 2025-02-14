@@ -2,8 +2,8 @@ from django.shortcuts import render, get_object_or_404, redirect
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.views import PasswordResetView, PasswordResetConfirmView
 from django.contrib import messages
-from .models import Department, Role, User, Task, TaskAssignment
-from .forms import DepartmentForm, RoleForm, UserForm, UserLoginForm, ResetPasswordForm, SetNewPasswordForm
+from .models import Department, Role, User, Task, TaskAssignment, PerformanceReview
+from .forms import DepartmentForm, RoleForm, UserForm, UserLoginForm, ResetPasswordForm, SetNewPasswordForm, PerformanceReviewForm
 from django.core.mail import send_mail
 from django.template.loader import render_to_string
 from django.utils.http import urlsafe_base64_encode, urlsafe_base64_decode
@@ -68,6 +68,76 @@ def dashboard(request):
     }
 
     return render(request, 'dashboard.html', context)
+
+def add_review(request):
+    if request.method == "POST":
+        form = PerformanceReviewForm(request.POST)
+        if form.is_valid():
+            review = form.save(commit=False)  # Don't save yet
+            
+            # Ensure employee_id is retrieved correctly
+            employee_id = request.POST.get('employee_id')
+            if employee_id:
+                try:
+                    review.employee = User.objects.get(employee_id=employee_id)  # Fetch instance
+                except User.DoesNotExist:
+                    return render(request, 'add_review.html', {'form': form, 'error': "Invalid Employee"})
+            
+            # ✅ Fix: Assign the logged-in user as 'reviewed_by'
+            if request.user.is_authenticated:
+                review.reviewed_by = request.user  # Assign the logged-in user
+            else:
+                return render(request, 'add_review.html', {'form': form, 'error': "You must be logged in to add a review."})
+            
+            review.save()  # Now save the review
+            return redirect('review_dashboard')
+    
+    else:
+        form = PerformanceReviewForm()
+
+    return render(request, 'add_review.html', {'form': form})
+
+
+
+def review_dashboard(request):
+    reviews = PerformanceReview.objects.all()  # Or filter based on your logic
+    return render(request, 'review_dashboard.html', {'reviews': reviews})
+
+def filter_tasks(request):
+    employee_id = request.GET.get('employee')
+    period = request.GET.get('period')
+    start_date = request.GET.get('start_date')
+    end_date = request.GET.get('end_date')
+    rating = request.GET.get('rating')
+
+    tasks = Task.objects.all()
+
+    # Filter by Employee
+    if employee_id:
+        tasks = tasks.filter(assigned_to_id=employee_id)
+
+    # Filter by Period
+    from datetime import datetime, timedelta
+    today = datetime.today().date()
+
+    if period == "today":
+        tasks = tasks.filter(start_date=today)
+    elif period == "this_week":
+        start_of_week = today - timedelta(days=today.weekday())
+        tasks = tasks.filter(start_date__gte=start_of_week)
+    elif period == "this_month":
+        tasks = tasks.filter(start_date__month=today.month)
+
+    # Filter by Date Range
+    if start_date and end_date:
+        tasks = tasks.filter(start_date__gte=start_date, end_date__lte=end_date)
+
+    # Filter by Rating
+    if rating:
+        tasks = tasks.filter(rating=rating)
+
+    context = {'tasks': tasks}
+    return render(request, 'review_dashboard.html', context)
 
 def department(request):
     departments = Department.objects.all()

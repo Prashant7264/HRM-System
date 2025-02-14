@@ -2,7 +2,7 @@ from hrm_app import views
 from django.urls import path
 from hr_management import settings
 from django.conf.urls.static import static
-from hrm_app.views import user_login, user_logout, CustomPasswordResetView, PasswordResetConfirmView, reset_password, verify_otp, request_otp
+from hrm_app.views import user_login, user_logout, CustomPasswordResetView, PasswordResetConfirmView, reset_password, verify_otp, request_otp, filter_tasks
 from django.contrib.auth import views as auth_views
 urlpatterns = [
     #path('admin/', admin.site.urls),
@@ -43,6 +43,9 @@ urlpatterns = [
     # path('assign/', views.assign_task, name='assign_task'),
     path('update_task/<int:task_id>/', views.update_task, name='update_task'),
     path('delete_task/<int:task_id>/', views.delete_task, name='delete_task'),
+    path('add-review/', views.add_review, name='add_review'),
+    path('review-dashboard/', views.review_dashboard, name='review_dashboard'),
+    path('filter-tasks/', filter_tasks, name='filter_tasks'),
     
 ]
 
